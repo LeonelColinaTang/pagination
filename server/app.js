@@ -17,11 +17,20 @@ app.get('/musicians', async (req, res, next) => {
     // Parse the query params, set default values, and create appropriate
     // offset and limit values if necessary.
     // Your code here
-    
-    // Query for all musicians
-    // Include attributes for `id`, `firstName`, and `lastName`
-    // Include associated bands and their `id` and `name`
-    // Order by musician `lastName` then `firstName`
+    // console.log("REQ PARAMS",req)
+    let page;
+
+    if(req.query.page === '0'){
+        page= 0
+    }else if(req.query.page === undefined){
+        page = 1
+    }else{
+        page = Number(req.query.page)
+    }
+
+    const size = page === 0 ? null : (Number(req.query.size) || 5);
+    console.log("size", size, typeof size)
+    const offset = size * (page - 1);
     const musicians = await Musician.findAll({ 
         order: [['lastName'], ['firstName']], 
         attributes: ['id', 'firstName', 'lastName'],
@@ -29,9 +38,8 @@ app.get('/musicians', async (req, res, next) => {
             model: Band,
             attributes: ['id', 'name']
         }],
-        // add limit key-value to query
-        // add offset key-value to query
-        // Your code here
+        limit: size,
+        offset: offset
     });
 
     res.json(musicians)
